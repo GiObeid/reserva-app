@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 def cadastrar_sala(s):
     sala_id = str(uuid.uuid4())
-    linha = f"\n{sala_id},{s['tipo']},{s['capacidade']},{s['descricao']},Sim"
+    linha = f"{sala_id},{s['tipo']},{s['capacidade']},{s['descricao']},Sim\n"
     with open("salas.csv", "a") as file:
         file.write(linha)
 
@@ -22,7 +22,43 @@ def carregar_salas():
                 "ativa": ativa
             }
             salas.append(sala)
-    return salas
+    return sorted(salas, key=lambda x: x['tipo'])  # Ordena por tipo
+
+def carregar_usuarios():
+    usuarios = []
+    with open("usuarios.csv", "r") as file:
+        for linha in file:
+            nome, email, password = linha.strip().split(",")
+            usuario = {
+                "nome": nome,
+                "email": email,
+                "password": password
+            }
+            usuarios.append(usuario)
+    return sorted(usuarios, key=lambda u: u['email'])  # Ordena por email
+
+def busca_binaria(lista, chave, chave_ordenacao):
+    baixo = 0
+    alto = len(lista) - 1
+    
+    while baixo <= alto:
+        meio = (baixo + alto) // 2
+        if lista[meio][chave_ordenacao] == chave:
+            return meio  # Retorna o índice se encontrado
+        elif lista[meio][chave_ordenacao] < chave:
+            baixo = meio + 1
+        else:
+            alto = meio - 1
+            
+    return -1  # Retorna -1 se não encontrado
+
+def usuario_existe(email):
+    usuarios = carregar_usuarios()
+    return busca_binaria(usuarios, email, 'email') != -1
+
+def sala_existe(tipo):
+    salas = carregar_salas()
+    return busca_binaria(salas, tipo, 'tipo') != -1
 
 @app.route("/")
 def index():
@@ -34,6 +70,10 @@ def cadastrar():
         nome = request.form.get("nome")
         email = request.form.get("email")
         password = request.form.get("password")
+
+        if usuario_existe(email):
+            return "Usuário já existe", 400
+        
         cadastrar_usuario({"nome": nome, "email": email, "password": password})
         return redirect(url_for("index"))
     return render_template("cadastro.html")
@@ -49,6 +89,10 @@ def cadastrar_salas():
         tipo = request.form.get("tipo")
         capacidade = request.form.get("capacidade")
         descricao = request.form.get("descricao")
+
+        if sala_existe(tipo):
+            return "Sala já existe", 400
+        
         cadastrar_sala({"tipo": tipo, "capacidade": capacidade, "descricao": descricao})
         return redirect(url_for("lista_salas"))
     return render_template("cadastrar-sala.html")
@@ -60,7 +104,7 @@ def excluir_sala(sala_id):
     
     with open("salas.csv", "w") as file:
         for sala in salas:
-            linha = f"{sala['id']},{sala['tipo']},{sala['capacidade']},{sala['descricao']}\n"
+            linha = f"{sala['id']},{sala['tipo']},{sala['capacidade']},{sala['descricao']},{sala['ativa']}\n"
             file.write(linha)
     
     return redirect(url_for("lista_salas"))
@@ -91,38 +135,17 @@ def detalhe_reserva():
 def reservar_sala():
     return render_template("reservar-sala.html")
 
-
 def cadastrar_usuario(u):
-    linha = f"\n{u['nome']},{u['email']},{u['password']}"
+    linha = f"{u['nome']},{u['email']},{u['password']}\n"
     with open("usuarios.csv", "a") as file:
         file.write(linha)
 
 def validar_usuario(email, password):
-    with open("usuarios.csv", "r") as file:
-        linhas = file.readlines()
-        for linha in linhas:
-            nome, user_email, user_password = linha.strip().split(",")
-            if email == user_email and password == user_password:
-                return True
+    usuarios = carregar_usuarios()
+    index = busca_binaria(usuarios, email, 'email')
+    if index != -1 and usuarios[index]['password'] == password:
+        return True
     return False
 
-def cadastrar_sala(s):
-    sala_id = str(uuid.uuid4())
-    linha = f"\n{sala_id},{s['tipo']},{s['capacidade']},{s['descricao']},Sim"
-    with open("salas.csv", "a") as file:
-        file.write(linha)
-
-def carregar_salas():
-    salas = []
-    with open("salas.csv", "r") as file:
-        for linha in file:
-            sala_id, tipo, capacidade, descricao, ativa = linha.strip().split(",")
-            sala = {
-                "id": sala_id,
-                "tipo": tipo,
-                "capacidade": capacidade,
-                "descricao": descricao,
-                "ativa": ativa
-            }
-            salas.append(sala)
-    return salas
+if __name__ == "__main__":
+    app.run(debug=True)
