@@ -12,7 +12,7 @@ def create_connection():
 class Connection:
     HOST = "localhost"
     USER = "root"
-    PASSWORD = "bts4"
+    PASSWORD = "gaj3"
     DATABASE = "reserva_app"
 
     def __init__(self):
