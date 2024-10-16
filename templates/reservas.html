@@ -1,0 +1,44 @@
+{% extends "layout/header.html" %} 
+
+{% from "macros/form-filter.html" import form_filter with context %}
+{% from "macros/reservas-table.html" import reservas_table with context %}
+
+{% block title %}Reservas{% endblock %} 
+
+{% block main %}
+<div class="container">
+  <div class="row mt-4">
+    <div class="col">
+      <h1>Reservas</h1>
+    </div>
+  </div>
+  
+  {{ form_filter() }}
+
+  {% if filtered_reservas == None %}
+
+    <hr />
+    <h2>Hoje</h2>
+    {% if not reservas_for_today %}
+      <p class="mt-3">Nenhuma reserva encontrada.</p>
+    {% else %}
+      {{ reservas_table(reservas_for_today) }}
+    {% endif %}
+
+    <hr />
+    <h2>Outras</h2>
+    {% if not reservas %}
+      <p class="mt-3">Nenhuma reserva encontrada.</p>
+    {% else %}
+      {{ reservas_table(reservas) }}
+    {% endif %}
+
+  {% else %}
+    {% if filtered_reservas == [] %}
+      <p class="mt-3">Nenhuma reserva encontrada.</p>
+    {% else %}
+      {{ reservas_table(filtered_reservas) }}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

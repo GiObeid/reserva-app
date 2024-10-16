@@ -1,0 +1,35 @@
+{% extends "layout/header.html" %} 
+
+{% block title %}
+  Reserva
+{% endblock %}
+
+{% block main %}
+  <div class="container">
+    <div class="row mt-4">
+      <div class="col">
+        <h1>Reserva {{ reserva.id }}</h1>
+        <p><b>Sala:</b> {{ reserva.sala.id }}</p>
+        <p><b>Início:</b> {{ reserva.date() }} - {{ reserva.time_inicio() }}</p>
+        <p><b>Fim:</b> {{ reserva.date() }} - {{ reserva.time_fim() }}</p>
+        <p>Reservado para {{ reserva.usuario.nome }}.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <h3>Gerar Comprovante</h3>
+        <p>Gere o pdf do comprovante de reserva.</p>
+        <a href="" class="btn btn-dark">Gerar Comprovante</a>
+      </div>
+      <div class="col-md-6 mb-4">
+        <h3>Cancelar Reserva</h3>
+        <p>
+          Você pode cancelar a reserva até 12 horas antes do início da reserva.
+        </p>
+        <form action="/reservas/{{ reserva.id }}/cancelar" method="POST">
+          <button class="btn btn-dark">Cancelar Reserva</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

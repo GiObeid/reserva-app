@@ -1,0 +1,69 @@
+{% extends "layout/header.html" %}
+
+{% block title %}Cadastrar Sala{% endblock %}
+
+{% block main %}
+
+  <div class="container">
+    <div class="row mt-4">
+      <div class="col">
+        <h1>Cadastrar Sala</h1>
+        <p>Utilize o formulário abaixo para cadastrar uma sala</p>
+      </div>
+    </div>
+    <div>
+      <div class="col">
+        {% if errors %}
+          {% for error in errors %}
+            <div class="alert alert-danger" role="alert">
+              {{ error }}
+            </div>
+          {% endfor %}
+        {% endif %}
+        <form action="/salas/cadastrar" method="POST">
+          <div class="mb-3">
+            <label for="tipo" class="form-label">
+              Tipo 
+              <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="tipo" name="tipo">
+              <option selected>Selecione um tipo</option>
+              {% for tipo in tipos %}
+                {% if tipo.value == inputs.tipo %}
+                  <option value="{{ tipo.value }}" selected>{{ tipo }}</option>
+                {% else %}
+                  <option value="{{ tipo.value }}">{{ tipo }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="capacidade" class="form-label">
+              Capacidade
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="number"
+              class="form-control"
+              name="capacidade"
+              id="capacidade"
+              value="{{ inputs.capacidade }}"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <textarea
+              class="form-control"
+              name="descricao"
+              id="descricao"
+              cols="30"
+              rows="10"
+            >{{ inputs.descricao }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-dark">Cadastrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
